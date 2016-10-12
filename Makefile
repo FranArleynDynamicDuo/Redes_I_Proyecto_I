@@ -1,21 +1,24 @@
-all: Server.o Client.o Constants.o
-	gcc Server.o Constants.o -o Executables/Server
-	gcc Client.o Constants.o -o Executables/Client
+all: Server.o Client.o Constants.o ErrorHandling.o
+	gcc Server.o Constants.o ErrorHandling.o -o bsb_svr
+	gcc Client.o Constants.o ErrorHandling.o -o bsb_cli
 
-Server: Server.o Constants.o
-	gcc Server.o Constants.o -o Executables/Server
+Server: Server.o Constants.o ErrorHandling.o
+	gcc Server.o Constants.o ErrorHandling.o -o Executables/Server
 	
-Client: Client.o Constants.o
-	gcc Client.o Constants.o -o Executables/Client
+Client: Client.o Constants.o ErrorHandling.o
+	gcc Client.o Constants.o ErrorHandling.o -o Executables/Client
 
 Server.o:
-	gcc -g -c Server/Server.c Constants.c Constants.h
+	gcc -g -c Server/Server.c Constants.c Constants.h ErrorHandling.c ErrorHandling.h
 
 Client.o:
-	gcc -g -c Client/Client.c Constants.c Constants.h
+	gcc -g -c Client/Client.c Constants.c Constants.h ErrorHandling.c ErrorHandling.h
 
 Constants.o:
 	gcc -g -c Constants.c Constants.h
+	
+ErrorHandling.o:
+	gcc -g -c ErrorHandling.c ErrorHandling.h
 
 clean:
-	rm *.o Executables/*
+	rm *.o bsb_svr bsb_cli

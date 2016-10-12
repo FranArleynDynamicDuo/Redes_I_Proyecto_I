@@ -11,6 +11,8 @@
 #ifndef ERRORHANDLING_H_
 #define ERRORHANDLING_H_
 
+/* FUNCIONES */
 
+void errorAndExit(const char* errorMessage);
 
 #endif /* ERRORHANDLING_H_ */

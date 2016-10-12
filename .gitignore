@@ -36,3 +36,6 @@
 *.cproject
 *.project
 *.settings
+
+bsb_cli
+bsb_svr
