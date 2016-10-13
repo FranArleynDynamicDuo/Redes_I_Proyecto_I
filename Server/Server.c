@@ -111,7 +111,9 @@ int main(int argc, char *argv[]) {
     	Send and receive data
 	 */
 	/* APERTURA DEL SOCKET */
-
+	socketDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+	if (socketDescriptor < 0)
+	        error("ERROR opening socket");
 	/* MAIN CICLE */
     while (true)
     {

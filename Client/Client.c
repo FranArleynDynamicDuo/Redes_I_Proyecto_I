@@ -100,8 +100,9 @@ int main(int argc, char *argv[]) {
     	but the simplest is to use the read() and write() system calls.
 	 */
 	/* APERTURA DEL SOCKET */
-	/* Abrimos el socket */
-	// socketDescriptor = socket(int domain, int type, int protocol);
+	socketDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+		if (socketDescriptor < 0)
+		        error("ERROR opening socket");
 }
 
 /* FUNCTION DECLARATION */
