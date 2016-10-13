@@ -6,12 +6,13 @@
  */
 
 /* INCLUDES */
-#include <stdbool.h>            // bool, true, false
-#include "../Constants.h"         	// Mensajes De Error y funciones comunes
+#include <stdbool.h>            		// bool, true, false
+#include "../Constants.h"         		// Mensajes De Error y funciones comunes
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
-#include <stdio.h>              // printf
-#include <stdlib.h>				// exit
-#include <string.h>             // strlen
+#include <stdio.h>              		// printf
+#include <stdlib.h>						// exit
+#include <string.h>             		// strlen
+#include <sys/socket.h>
 
 /* DEFINES */
 #define MSG_LEN 500
@@ -36,14 +37,14 @@ char puertoDeServicio[MSG_LEN];
 FILE * bitacoraRetiro;
 FILE * bitacoraRetiro;
 int contadorTrasacciones;
-
+int socketDescriptor;
 
 int main(int argc, char *argv[]) {
 
 	/* LOCAL VARIABLES */
-	int i =0;				// Iterador Multi-uso
-	int bitPortSwitch = 0;	// Booleanos que indican si ya se dio el argumento
-	int bitDepSwitch = 0;
+	int i =0;							// Iterador Multi-uso
+	int bitPortSwitch = 0;				// Booleanos que indican
+	int bitDepSwitch = 0;				// si ya se dio el argumento
 	int bitRetSwitch = 0;
 	char dirBitacoraDeposito[MSG_LEN];
 	char dirBitacoraRetiro[MSG_LEN];
@@ -90,6 +91,27 @@ int main(int argc, char *argv[]) {
 		exit(0);
 
 	}
+	/*
+		http://www.linuxhowtos.org/C_C++/socket.htm
+
+		The steps involved in establishing a socket on the server side are as
+		follows:
+
+		Create a socket with the socket() system call
+
+    	Bind the socket to an address using the bind() system call. For a server
+    	socket on the Internet, an address consists of a port number on the
+    	host machine.
+
+    	Listen for connections with the listen() system call
+
+    	Accept a connection with the accept() system call. This call typically
+    	blocks until a client connects with the server.
+
+    	Send and receive data
+	 */
+	/* APERTURA DEL SOCKET */
+
 	/* MAIN CICLE */
     while (true)
     {

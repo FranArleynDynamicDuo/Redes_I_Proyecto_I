@@ -9,6 +9,7 @@
 #include <stdbool.h>					// bool, true, false
 #include "../Constants.h"         	// Mensajes De Error y funciones comunes
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
+#include <sys/socket.h>
 
 /* DEFINES */
 #define MSG_LEN 500
@@ -26,6 +27,7 @@ char operation;
 char serverPort[30];
 char userId[30];
 char atentionModule[30];
+int socketDescriptor;
 
 int main(int argc, char *argv[]) {
 	wait(1);
@@ -83,6 +85,23 @@ int main(int argc, char *argv[]) {
 		exit(0);
 
 	}
+	/*
+		http://www.linuxhowtos.org/C_C++/socket.htm
+
+		The steps involved in establishing a socket on the client side are
+		as follows:
+
+    	Create a socket with the socket() system call
+
+    	Connect the socket to the address of the server using the connect()
+    	system call
+
+    	Send and receive data. There are a number of ways to do this,
+    	but the simplest is to use the read() and write() system calls.
+	 */
+	/* APERTURA DEL SOCKET */
+	/* Abrimos el socket */
+	// socketDescriptor = socket(int domain, int type, int protocol);
 }
 
 /* FUNCTION DECLARATION */
