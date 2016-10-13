@@ -10,6 +10,7 @@
 #include "../Constants.h"         	// Mensajes De Error y funciones comunes
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
 #include <sys/socket.h>
+#include <string.h>             		// strlen
 
 /* DEFINES */
 #define MSG_LEN 500
@@ -30,7 +31,6 @@ char atentionModule[30];
 int socketDescriptor;
 
 int main(int argc, char *argv[]) {
-	wait(1);
 
 	/* LOCAL VARIABLES */
 	int i =0;				// Iterador Multi-uso
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
 			else if ((strcmp(argv[i],"-c")) == 0 && operationSwitch == 0)
 			{
-				strcpy(operation,argv[i + 1]);
+				operation=argv[i + 1];
 				operationSwitch = 1;
 			}
 			/* Caso 2.4: Se recibieron argumentos en un formato invalido */
@@ -81,9 +81,7 @@ int main(int argc, char *argv[]) {
 	}
 	else
 	{
-		printf("%s", argNumError);
-		exit(0);
-
+		errorAndExit(argNumError);
 	}
 	/*
 		http://www.linuxhowtos.org/C_C++/socket.htm
@@ -101,8 +99,10 @@ int main(int argc, char *argv[]) {
 	 */
 	/* APERTURA DEL SOCKET */
 	socketDescriptor = socket(AF_INET, SOCK_STREAM, 0);
-		if (socketDescriptor < 0)
-		        error("ERROR opening socket");
+	if (socketDescriptor < 0)
+	{
+		errorAndExit("ERROR opening socket");
+	}
 }
 
 /* FUNCTION DECLARATION */

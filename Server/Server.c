@@ -87,9 +87,7 @@ int main(int argc, char *argv[]) {
 	}
 	else
 	{
-		printf("%s", argNumError);
-		exit(0);
-
+		errorAndExit(argNumError);
 	}
 	/*
 		http://www.linuxhowtos.org/C_C++/socket.htm
@@ -113,7 +111,7 @@ int main(int argc, char *argv[]) {
 	/* APERTURA DEL SOCKET */
 	socketDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketDescriptor < 0)
-	        error("ERROR opening socket");
+		errorAndExit("ERROR opening socket");
 	/* MAIN CICLE */
     while (true)
     {
