@@ -38,5 +38,5 @@ void errorAndExit(const char* errorMessage)
 {
 	perror(errorMessage);
 	printf("\n");
-	exit(0);
+	exit(1);
 }

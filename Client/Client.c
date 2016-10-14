@@ -27,6 +27,7 @@
 #define N 20
 #define AMOUNT 3000
 
+
 /* ESTRUCTURES */
 
 /* FUNCTION SIGNATURES */

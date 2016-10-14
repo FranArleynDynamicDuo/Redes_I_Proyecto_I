@@ -45,7 +45,7 @@ static void sigkillHandler(int signo);
 
 /* GLOBAL VARIABLES */
 int puertoDeServicio;
-FILE * bitacoraRetiro;
+FILE * bitacoraDeposito;
 FILE * bitacoraRetiro;
 int contadorTrasacciones;
 int socketDescriptor;
@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
 	int clilen;
 	int readWriteCode;
 	struct sockaddr_in serv_addr, cli_addr;
+	int pid;
 
 	/* SIGNALS */
     signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
@@ -90,7 +91,7 @@ int main(int argc, char *argv[]) {
 			else if ((strcmp(argv[i],"-i")) == 0 && bitDepSwitch == 0)
 			{
 				strcpy(dirBitacoraDeposito,argv[i + 1]);
-				bitacoraRetiro = fopen (dirBitacoraDeposito, "w+");
+				bitacoraDeposito = fopen (dirBitacoraDeposito, "w+");
 				bitDepSwitch = 1;
 			}
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
@@ -149,11 +150,13 @@ int main(int argc, char *argv[]) {
 	{
 		errorAndExit("ERROR binding socket");
 	}
+	listen(socketDescriptor,5);
+	clilen = sizeof(cli_addr);
+
 	/* MAIN CICLE */
     while (true)
     {
-    	listen(socketDescriptor,5);
-		clilen = sizeof(cli_addr);
+
 		/* ACEPTANDO LA CONEXION */
 		newSocketDescriptor = accept(socketDescriptor,
 				 (struct sockaddr *) &cli_addr,
@@ -164,20 +167,38 @@ int main(int argc, char *argv[]) {
 		}
 		/* Vaciamos el buffer */
 		bzero(buffer,MSG_LEN);
-		/* LEYENDO DEL SOCKET */
-		readWriteCode = read(newSocketDescriptor,buffer,255);
-		if (readWriteCode < 0)
+		/* Create child process */
+		pid = fork();
+
+		if (pid < 0)
 		{
-			errorAndExit("ERROR reading from socket");
-		}
-		printf("Here is the message: %s\n",buffer);
-		/* ESCRIBIENDO AL SOCKET */
-		readWriteCode = write(newSocketDescriptor,"I got your message",18);
-		if (readWriteCode < 0)
-		{
-			errorAndExit("ERROR writing to socket");
+			perror("ERROR on fork");
+			exit(1);
 		}
 
+		if (pid == 0)
+		{
+			/* This is the client process */
+			close(socketDescriptor);
+			/* LEYENDO DEL SOCKET */
+			readWriteCode = read(newSocketDescriptor,buffer,255);
+			if (readWriteCode < 0)
+			{
+				errorAndExit("ERROR reading from socket");
+			}
+			printf("Here is the message: %s\n",buffer);
+			/* ESCRIBIENDO AL SOCKET */
+			readWriteCode = write(newSocketDescriptor,"I got your message",18);
+			if (readWriteCode < 0)
+			{
+				errorAndExit("ERROR writing to socket");
+			}
+			exit(0);
+		}
+		else
+		{
+			close(newSocketDescriptor);
+		}
     }
 	close(newSocketDescriptor);
 	close(socketDescriptor);
