@@ -25,10 +25,12 @@
 #define NAME_LEN 60
 #define BASIC_PERMISSIONS 0666
 #define N 20
+#define AMOUNT 3000
 
 /* ESTRUCTURES */
 
 /* FUNCTION SIGNATURES */
+char* transaction(char userId[],char operationType[],int amount);
 
 /* GLOBAL VARIABLES */
 int totalDisponible = 80000;
@@ -132,9 +134,8 @@ int main(int argc, char *argv[]) {
 		errorAndExit("ERROR connecting");
 	}
 	/* ENVIO DEL COMANDO */
-	printf("Please enter the message: ");
 	bzero(buffer,MSG_LEN);
-	fgets(buffer,MSG_LEN - 1,stdin);
+	sprintf(buffer, "%s-%s-%d", operation, userId,AMOUNT);
 	readWriteCode = write(socketDescriptor,buffer,strlen(buffer));
 	if (readWriteCode < 0)
 	{
@@ -153,3 +154,4 @@ int main(int argc, char *argv[]) {
 }
 
 /* FUNCTION DECLARATION */
+

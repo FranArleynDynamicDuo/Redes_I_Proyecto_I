@@ -16,6 +16,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <signal.h>	// Signal
 
 /* DEFINES */
 #define MSG_LEN 500
@@ -34,6 +35,7 @@ struct transaction {
 /* FUNCTION SIGNATURES */
 void registrarDepositoEnBitacora();
 void registrarRetiroEnBitacora();
+static void sigkillHandler(int signo);
 
 /* GLOBAL VARIABLES */
 int puertoDeServicio;
@@ -59,6 +61,10 @@ int main(int argc, char *argv[]) {
 	int readWriteCode;
 
 	/* SIGNALS */
+    signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
+	signal(SIGINT, sigkillHandler);		// Manejador de senales para SIGINT
+	signal(SIGABRT, sigkillHandler);	// Manejador de senales para SIGINT
+	signal(SIGTERM, sigkillHandler); // Manejador de senales para SIGINT
 
 	/* ARGUMENT MANAGEMENT */
 	/* Caso 0: Se recibio los argumentos */
@@ -172,6 +178,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
+
 /* FUNCTION DECLARATION */
 /*
  * Function:  registrarDepositoEnBitacora()
@@ -193,4 +200,21 @@ void registrarDepositoEnBitacora()
  */
 void registrarRetiroEnBitacora()
 {
+}
+
+/*
+ * Function:  sigkillHandler
+ * --------------------
+ *  Manejador de señales por si el servidor se cierra inesperadamente
+ *
+ *  signo:
+ *
+ *  returns: void
+ */
+static void sigkillHandler(int signo)
+{
+	printf("Saliendo...");
+	close(newSocketDescriptor);
+	close(socketDescriptor);
+    exit(0);
 }
