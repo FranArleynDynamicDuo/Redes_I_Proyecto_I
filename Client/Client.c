@@ -30,7 +30,6 @@
 /* ESTRUCTURES */
 
 /* FUNCTION SIGNATURES */
-char* transaction(char userId[],char operationType[],int amount);
 
 /* GLOBAL VARIABLES */
 int totalDisponible = 80000;

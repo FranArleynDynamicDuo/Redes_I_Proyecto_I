@@ -23,8 +23,14 @@
 #define STATUS_LEN 100
 #define BASIC_PERMISSIONS 0666
 #define N 20
+#define DEFAULT_CLIENT_AMOUNT 80000
 
 /* ESTRUCTURES */
+struct cajero {
+    char userCode[30];
+    char datetime[30];
+    int totalAmount;
+};
 struct transaction {
     char userCode[30];
 	char operation;
@@ -59,6 +65,7 @@ int main(int argc, char *argv[]) {
 	char dirBitacoraRetiro[MSG_LEN];
 	int clilen;
 	int readWriteCode;
+	struct sockaddr_in serv_addr, cli_addr;
 
 	/* SIGNALS */
     signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
@@ -132,7 +139,6 @@ int main(int argc, char *argv[]) {
 
 
 	/* CONEXION DEL SOCKET */
-	struct sockaddr_in serv_addr, cli_addr;
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -213,7 +219,7 @@ void registrarRetiroEnBitacora()
  */
 static void sigkillHandler(int signo)
 {
-	printf("Saliendo...");
+	printf("Saliendo...\n");
 	close(newSocketDescriptor);
 	close(socketDescriptor);
     exit(0);
