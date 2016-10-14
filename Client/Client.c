@@ -11,10 +11,18 @@
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
 #include <sys/socket.h>
 #include <string.h>             		// strlen
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <netdb.h>
+
 
 /* DEFINES */
 #define MSG_LEN 500
 #define STATUS_LEN 100
+#define NAME_LEN 60
 #define BASIC_PERMISSIONS 0666
 #define N 20
 
@@ -24,11 +32,12 @@
 
 /* GLOBAL VARIABLES */
 int totalDisponible = 80000;
-char operation;
-char serverPort[30];
-char userId[30];
-char atentionModule[30];
+char operation[1];
+int serverPort;
+char userId[NAME_LEN];
+char atentionModule[NAME_LEN];
 int socketDescriptor;
+char buffer[MSG_LEN];
 
 int main(int argc, char *argv[]) {
 
@@ -38,6 +47,9 @@ int main(int argc, char *argv[]) {
 	int userIdSwitch = 0;
 	int atmoduleSwitch = 0;
 	int operationSwitch = 0;
+	struct sockaddr_in serv_addr;
+	struct hostent *server;
+	int readWriteCode;
 
 	/* SIGNALS */
 
@@ -63,13 +75,13 @@ int main(int argc, char *argv[]) {
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
 			else if ((strcmp(argv[i],"-p")) == 0 && serverPortSwitch == 0)
 			{
-				strcpy(serverPort,argv[i + 1]);
+				serverPort=atoi(argv[i + 1]);
 				serverPortSwitch = 1;
 			}
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
 			else if ((strcmp(argv[i],"-c")) == 0 && operationSwitch == 0)
 			{
-				operation=argv[i + 1];
+				strcpy(operation,argv[i + 1]);
 				operationSwitch = 1;
 			}
 			/* Caso 2.4: Se recibieron argumentos en un formato invalido */
@@ -103,6 +115,41 @@ int main(int argc, char *argv[]) {
 	{
 		errorAndExit("ERROR opening socket");
 	}
+
+
+	/* CONEXION DEL SOCKET */
+	server = gethostbyname(atentionModule);
+	if (server == NULL)
+	{
+		errorAndExit("ERROR, no such host\n");
+	}
+	bzero((char *) &serv_addr, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
+	serv_addr.sin_port = htons(serverPort);
+	if (connect(socketDescriptor,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0)
+	{
+		errorAndExit("ERROR connecting");
+	}
+	/* ENVIO DEL COMANDO */
+	printf("Please enter the message: ");
+	bzero(buffer,MSG_LEN);
+	fgets(buffer,MSG_LEN - 1,stdin);
+	readWriteCode = write(socketDescriptor,buffer,strlen(buffer));
+	if (readWriteCode < 0)
+	{
+		errorAndExit("ERROR writing to socket");
+	}
+	/* RETORNO DE TICKET */
+	bzero(buffer,MSG_LEN);
+	readWriteCode = read(socketDescriptor,buffer,MSG_LEN - 1);
+	if (readWriteCode < 0)
+	{
+		errorAndExit("ERROR reading from socket");
+	}
+	printf("%s\n",buffer);
+	close(socketDescriptor);
+	return 0;
 }
 
 /* FUNCTION DECLARATION */

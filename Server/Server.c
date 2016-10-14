@@ -13,6 +13,9 @@
 #include <stdlib.h>						// exit
 #include <string.h>             		// strlen
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 /* DEFINES */
 #define MSG_LEN 500
@@ -33,11 +36,15 @@ void registrarDepositoEnBitacora();
 void registrarRetiroEnBitacora();
 
 /* GLOBAL VARIABLES */
-char puertoDeServicio[MSG_LEN];
+int puertoDeServicio;
 FILE * bitacoraRetiro;
 FILE * bitacoraRetiro;
 int contadorTrasacciones;
 int socketDescriptor;
+int newSocketDescriptor;
+int portno;
+char buffer[MSG_LEN];
+
 
 int main(int argc, char *argv[]) {
 
@@ -48,6 +55,8 @@ int main(int argc, char *argv[]) {
 	int bitRetSwitch = 0;
 	char dirBitacoraDeposito[MSG_LEN];
 	char dirBitacoraRetiro[MSG_LEN];
+	int clilen;
+	int readWriteCode;
 
 	/* SIGNALS */
 
@@ -61,7 +70,7 @@ int main(int argc, char *argv[]) {
 			/* Caso 2.1: Se recibio el numero de puerto */
 			if ((strcmp(argv[i],"-l")) == 0 && bitPortSwitch == 0)
 			{
-				strcpy(puertoDeServicio,argv[i + 1]);
+				portno=atoi(argv[i + 1]);
 				bitPortSwitch = 1;
 			}
 			/* Caso 2.2: Se recibio el archivo de bitacora de deposito */
@@ -69,7 +78,7 @@ int main(int argc, char *argv[]) {
 			{
 				strcpy(dirBitacoraDeposito,argv[i + 1]);
 				bitacoraRetiro = fopen (dirBitacoraDeposito, "w+");
-				bitRetSwitch = 1;
+				bitDepSwitch = 1;
 			}
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
 			else if ((strcmp(argv[i],"-o")) == 0 && bitRetSwitch == 0)
@@ -111,12 +120,56 @@ int main(int argc, char *argv[]) {
 	/* APERTURA DEL SOCKET */
 	socketDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketDescriptor < 0)
+	{
 		errorAndExit("ERROR opening socket");
+	}
+
+
+	/* CONEXION DEL SOCKET */
+	struct sockaddr_in serv_addr, cli_addr;
+	bzero((char *) &serv_addr, sizeof(serv_addr));
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_addr.s_addr = INADDR_ANY;
+	serv_addr.sin_port = htons(portno);
+
+	if (bind(socketDescriptor, (struct sockaddr *) &serv_addr,
+				  sizeof(serv_addr)) < 0)
+	{
+		errorAndExit("ERROR binding socket");
+	}
 	/* MAIN CICLE */
     while (true)
     {
+    	listen(socketDescriptor,5);
+		clilen = sizeof(cli_addr);
+		/* ACEPTANDO LA CONEXION */
+		newSocketDescriptor = accept(socketDescriptor,
+				 (struct sockaddr *) &cli_addr,
+				 &clilen);
+		if (newSocketDescriptor < 0)
+		{
+			errorAndExit("ERROR on accept");
+		}
+		/* Vaciamos el buffer */
+		bzero(buffer,MSG_LEN);
+		/* LEYENDO DEL SOCKET */
+		readWriteCode = read(newSocketDescriptor,buffer,255);
+		if (readWriteCode < 0)
+		{
+			errorAndExit("ERROR reading from socket");
+		}
+		printf("Here is the message: %s\n",buffer);
+		/* ESCRIBIENDO AL SOCKET */
+		readWriteCode = write(newSocketDescriptor,"I got your message",18);
+		if (readWriteCode < 0)
+		{
+			errorAndExit("ERROR writing to socket");
+		}
 
     }
+	close(newSocketDescriptor);
+	close(socketDescriptor);
+	return 0;
 }
 
 /* FUNCTION DECLARATION */
