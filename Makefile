@@ -1,5 +1,5 @@
 all: Server.o Client.o Constants.o ErrorHandling.o
-	gcc Server.o Constants.o ErrorHandling.o -o bsb_svr
+	gcc Server.o Constants.o ErrorHandling.o -lpthread -o bsb_svr
 	gcc Client.o Constants.o ErrorHandling.o -o bsb_cli
 
 Server: Server.o Constants.o ErrorHandling.o
@@ -9,7 +9,7 @@ Client: Client.o Constants.o ErrorHandling.o
 	gcc Client.o Constants.o ErrorHandling.o -o Executables/Client
 
 Server.o:
-	gcc -g -c Server/Server.c Constants.c Constants.h ErrorHandling.c ErrorHandling.h
+	gcc -g -c Server/Server.c Constants.c Constants.h ErrorHandling.c ErrorHandling.h -lpthread
 
 Client.o:
 	gcc -g -c Client/Client.c Constants.c Constants.h ErrorHandling.c ErrorHandling.h
