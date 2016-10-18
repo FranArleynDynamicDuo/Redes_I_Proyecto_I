@@ -15,6 +15,18 @@
 
 /* ESTRUCTURES */
 
+struct cajero {
+	int totalAmount;
+};
+
+struct transaction {
+	char userCode[30];
+	char operation;
+	int amount;
+	char date[30];
+	char time[30];
+};
+
 /* FUNCTION SIGNATURES */
 void retiro();
 void deposito();
@@ -24,6 +36,12 @@ void imprimeTicket();
 
 
 /* GLOBAL VARIABLES */
+
+// bitacoraDeposito = fopen (dirBitacoraDeposito, "w+");
+// bitacoraRetiro = fopen (dirBitacoraRetiro, "w+");
+
+FILE * bitacoraDeposito;
+FILE * bitacoraRetiro;
 int totalDisponible = 80000;
 char operation[1] = "i";
 int IdUsuario;
@@ -34,6 +52,22 @@ int main(int argc, char *argv[]) {
 
 	int i = 10;					// Iterador Multi-
 	int j = 0;
+
+	bitacoraDeposito = fopen ("deposito.txt", "w+");
+	fputs( "---------------------Bitacora de Depositos ------------------\n", bitacoraDeposito );
+	fputs( "\n", bitacoraDeposito );
+	fputs( "  Fecha      Hora      Codigo   Operacion   Total Disponible\n", bitacoraDeposito );
+	fputs( "-------------------------------------------------------------\n", bitacoraDeposito );
+	fputs( "\n", bitacoraDeposito );
+	fclose(bitacoraDeposito);
+
+	bitacoraRetiro = fopen ("retiros.txt", "w+");
+	fputs( "---------------------Bitacora de Retiros ------------------\n", bitacoraRetiro );
+	fputs( "\n", bitacoraRetiro );
+	fputs( "  Fecha      Hora      Codigo   Operacion   Total Disponible\n", bitacoraRetiro );
+	fputs( "-------------------------------------------------------------\n", bitacoraRetiro );
+	fputs( "\n", bitacoraRetiro );
+	fclose(bitacoraRetiro);
 
 	printf("Introduzca el Codigo del Usuario\n");
 	scanf("%d", &IdUsuario);
@@ -60,6 +94,8 @@ int main(int argc, char *argv[]) {
 		}
 }
 
+
+// ---------------------------------------- USAR LAS ESTRUCTURAS ----------------------------------------------
 void retiro()
 {
 	int retiro;
@@ -76,17 +112,17 @@ void retiro()
 
 		    			time_t tiempo = time(0);
 					    struct tm *tlocal = localtime(&tiempo);
-					    
 					    strftime(fecha, 50, "%d/%m/%y", tlocal);
 						strftime(hora, 50, "%H:%M:%S", tlocal);
-	
+
 		    			imprimeTicket(&IdUsuario);
+		    			registrarRetiroEnBitacora();
+
 	    			}
 	    		else
 	    			{
 	    				printf("El monto maximo de retiro es 3000\n");
 	    			}
-
 			}	
 		else
 			{
@@ -106,28 +142,37 @@ void deposito()
 
 	time_t tiempo = time(0);
     struct tm *tlocal = localtime(&tiempo);
-    
     strftime(fecha, 50, "%d/%m/%y", tlocal);
 	strftime(hora, 50, "%H:%M:%S", tlocal);
 
 	imprimeTicket(&IdUsuario);
+	registrarDepositoEnBitacora();
 }
+// ---------------------------------------- USAR LAS ESTRUCTURAS ----------------------------------------------
+
 
 
 void registrarDepositoEnBitacora()
 {
+	bitacoraDeposito = fopen ("deposito.txt", "a");
+	fprintf(bitacoraDeposito,"%s   %s   %d   Deposito        %d\n",fecha, hora, IdUsuario, totalDisponible);
+	fclose(bitacoraDeposito);
 }
 
 void registrarRetiroEnBitacora()
 {
+
+	bitacoraRetiro = fopen ("retiros.txt", "a");
+	fprintf(bitacoraRetiro,"%s   %s   %d    Retiro         %d\n",fecha, hora, IdUsuario, totalDisponible);
+	fclose(bitacoraRetiro);
 }
 
 void imprimeTicket( int *idUsuario){
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
 
-		printf("	Fecha: %s\n",output);
-		printf("	Hora: %s\n",output);
+		printf("	Fecha: %s\n", fecha);
+		printf("	Hora: %s\n", hora);
 		printf("	Codigo: %d\n", *idUsuario);
 		
 		if ( operation[1] == 'd') 
