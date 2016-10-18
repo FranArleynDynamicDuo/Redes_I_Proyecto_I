@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	printf("Introduzca el Codigo del Usuario\n");
 	scanf("%d", &IdUsuario);
 
-	for (j; j<i ; j++) 
+	while (operation[1] != 'f')
 		{
 			if (totalDisponible < 5000)
 				{
