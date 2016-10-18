@@ -16,6 +16,8 @@
 /* ESTRUCTURES */
 
 /* FUNCTION SIGNATURES */
+void retiro();
+void deposito();
 void registrarDepositoEnBitacora();
 void registrarRetiroEnBitacora();
 void imprimeTicket();
@@ -37,7 +39,6 @@ int main(int argc, char *argv[]) {
 
 	for (j; j<i ; j++) 
 		{
-
 			if (totalDisponible < 5000)
 				{
 					printf("AQUI SE MANDA UN MENSAJE AL SERVIDOR PARA RECARGAR\n");	
@@ -49,44 +50,52 @@ int main(int argc, char *argv[]) {
 
 			if (operation[1] == 'd')
 				{
-					int deposito;
-					printf("Introduzca el valor del deposito\n");
-				    scanf("%d", &deposito);
-			    	totalDisponible = totalDisponible + deposito;
-			    	printf("Valor del deposito: %d\n", deposito);
-			    	printf("Valor del Total Disponible: %d\n",totalDisponible);
-			    	imprimeTicket(&IdUsuario, &operation[1]);
-
+					deposito();
 				}
 			else if (operation[1] == 'r')
 				{
-					int retiro;
-					printf("Introduzca el valor del retiro\n");
-				    scanf("%d", &retiro);
-
-						if 	(retiro <= totalDisponible)
-							{
-								if ( retiro <= 3000 )
-									{
-										totalDisponible = totalDisponible - retiro;
-						    			printf("Valor del retiro: %d\n", retiro);
-						    			printf("Valor del Total Disponible: %d\n",totalDisponible);
-						    			imprimeTicket(&IdUsuario, &operation[1]);
-					    			}
-					    		else
-					    			{
-					    				printf("El monto maximo de retiro es 3000\n");
-					    			}
-
-							}	
-						else
-							{
-								printf("Dinero No Disponible\n");
-							}
+					retiro();
 				}
-
 		}
+}
 
+void retiro()
+{
+	int retiro;
+	printf("Introduzca el valor del retiro\n");
+    scanf("%d", &retiro);
+
+		if 	(retiro <= totalDisponible)
+			{
+				if ( retiro <= 3000 )
+					{
+						totalDisponible = totalDisponible - retiro;
+		    			printf("Valor del retiro: %d\n", retiro);
+		    			printf("Valor del Total Disponible: %d\n",totalDisponible);
+		    			imprimeTicket(&IdUsuario);
+	    			}
+	    		else
+	    			{
+	    				printf("El monto maximo de retiro es 3000\n");
+	    			}
+
+			}	
+		else
+			{
+				printf("Dinero No Disponible\n");
+			}
+}
+
+void deposito()
+{
+	int deposito;
+	printf("Introduzca el valor del deposito\n");
+    scanf("%d", &deposito);
+	totalDisponible = totalDisponible + deposito;
+
+	printf("Valor del deposito: %d\n", deposito);
+	printf("Valor del Total Disponible: %d\n",totalDisponible);
+	imprimeTicket(&IdUsuario);
 }
 
 
@@ -98,7 +107,7 @@ void registrarRetiroEnBitacora()
 {
 }
 
-void imprimeTicket( int *idUsuario, char *opertion[1] ){
+void imprimeTicket( int *idUsuario){
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
 
@@ -106,23 +115,21 @@ void imprimeTicket( int *idUsuario, char *opertion[1] ){
 	    struct tm *tlocal = localtime(&tiempo);
 	    
 	    strftime(output, 128, "%d/%m/%y", tlocal);
-		printf("Fecha: %s\n",output);
+		printf("	Fecha: %s\n",output);
 		
 		strftime(output, 128, "%H:%M:%S", tlocal);
-		printf("Hora: %s\n",output);
+		printf("	Hora: %s\n",output);
 
-		printf("Codigo: %d\n", *idUsuario);
-
-	printf("\n");
+		printf("	Codigo: %d\n", *idUsuario);
 		
-		// FALTA IMPRIMIR EL TIPO DE OPERACION
-		// if ( *opertion[1] == 'd') 
-		// 	{
-		// 		printf("Operacion: Deposito");
-		// 	}
-		// else
-		// 	{
-		// 		printf("Operacion: Retiro");
-		// 	}
+		if ( operation[1] == 'd') 
+			{
+				printf("	Operacion: Deposito\n");
+			}
+		else
+			{
+				printf("	Operacion: Retiro\n");
+			}
+	printf("\n");
 		
 }
