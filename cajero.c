@@ -27,7 +27,8 @@ void imprimeTicket();
 int totalDisponible = 80000;
 char operation[1] = "i";
 int IdUsuario;
-char output[128];
+char fecha[50];
+char hora[50];
 
 int main(int argc, char *argv[]) {
 
@@ -72,6 +73,13 @@ void retiro()
 						totalDisponible = totalDisponible - retiro;
 		    			printf("Valor del retiro: %d\n", retiro);
 		    			printf("Valor del Total Disponible: %d\n",totalDisponible);
+
+		    			time_t tiempo = time(0);
+					    struct tm *tlocal = localtime(&tiempo);
+					    
+					    strftime(fecha, 50, "%d/%m/%y", tlocal);
+						strftime(hora, 50, "%H:%M:%S", tlocal);
+	
 		    			imprimeTicket(&IdUsuario);
 	    			}
 	    		else
@@ -95,6 +103,13 @@ void deposito()
 
 	printf("Valor del deposito: %d\n", deposito);
 	printf("Valor del Total Disponible: %d\n",totalDisponible);
+
+	time_t tiempo = time(0);
+    struct tm *tlocal = localtime(&tiempo);
+    
+    strftime(fecha, 50, "%d/%m/%y", tlocal);
+	strftime(hora, 50, "%H:%M:%S", tlocal);
+
 	imprimeTicket(&IdUsuario);
 }
 
@@ -111,15 +126,8 @@ void imprimeTicket( int *idUsuario){
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
 
-		time_t tiempo = time(0);
-	    struct tm *tlocal = localtime(&tiempo);
-	    
-	    strftime(output, 128, "%d/%m/%y", tlocal);
 		printf("	Fecha: %s\n",output);
-		
-		strftime(output, 128, "%H:%M:%S", tlocal);
 		printf("	Hora: %s\n",output);
-
 		printf("	Codigo: %d\n", *idUsuario);
 		
 		if ( operation[1] == 'd') 
