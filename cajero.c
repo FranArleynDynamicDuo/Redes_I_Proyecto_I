@@ -28,7 +28,7 @@ struct transaction {
 };
 
 /* FUNCTION SIGNATURES */
-void retiro();
+void retiros();
 void deposito();
 void registrarDepositoEnBitacora();
 void registrarRetiroEnBitacora();
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 	fclose(bitacoraDeposito);
 
 	bitacoraRetiro = fopen ("retiros.txt", "w+");
-	fputs( "---------------------Bitacora de Retiros ------------------\n", bitacoraRetiro );
+	fputs( "---------------------Bitacora de Retiros --------------------\n", bitacoraRetiro );
 	fputs( "\n", bitacoraRetiro );
 	fputs( "  Fecha      Hora      Codigo   Operacion   Total Disponible\n", bitacoraRetiro );
 	fputs( "-------------------------------------------------------------\n", bitacoraRetiro );
@@ -89,34 +89,34 @@ int main(int argc, char *argv[]) {
 				}
 			else if (operation[1] == 'r')
 				{
-					retiro();
+					retiros();
 				}
 		}
 }
 
 
 // ---------------------------------------- USAR LAS ESTRUCTURAS ----------------------------------------------
-void retiro()
+void retiros()
 {
-	int retiro;
+	struct transaction retiro;
 	printf("Introduzca el valor del retiro\n");
-    scanf("%d", &retiro);
+    scanf("%d", &retiro.amount);
 
-		if 	(retiro <= totalDisponible)
+		if 	(retiro.amount <= totalDisponible)
 			{
-				if ( retiro <= 3000 )
+				if ( retiro.amount <= 3000 )
 					{
-						totalDisponible = totalDisponible - retiro;
-		    			printf("Valor del retiro: %d\n", retiro);
+						totalDisponible = totalDisponible - retiro.amount;
+		    			printf("Valor del retiro: %d\n", retiro.amount);
 		    			printf("Valor del Total Disponible: %d\n",totalDisponible);
 
 		    			time_t tiempo = time(0);
 					    struct tm *tlocal = localtime(&tiempo);
-					    strftime(fecha, 50, "%d/%m/%y", tlocal);
-						strftime(hora, 50, "%H:%M:%S", tlocal);
+					    strftime(retiro.date, 50, "%d/%m/%y", tlocal);
+						strftime(retiro.time, 50, "%H:%M:%S", tlocal);
 
-		    			imprimeTicket(&IdUsuario);
-		    			registrarRetiroEnBitacora();
+		    			imprimeTicket(&IdUsuario, retiro);
+		    			registrarRetiroEnBitacora(retiro);
 
 	    			}
 	    		else
@@ -132,47 +132,47 @@ void retiro()
 
 void deposito()
 {
-	int deposito;
+	struct transaction deposito;
 	printf("Introduzca el valor del deposito\n");
-    scanf("%d", &deposito);
-	totalDisponible = totalDisponible + deposito;
+    scanf("%d", &deposito.amount);
+	totalDisponible = totalDisponible + deposito.amount;
 
-	printf("Valor del deposito: %d\n", deposito);
+	printf("Valor del deposito: %d\n", deposito.amount);
 	printf("Valor del Total Disponible: %d\n",totalDisponible);
 
 	time_t tiempo = time(0);
     struct tm *tlocal = localtime(&tiempo);
-    strftime(fecha, 50, "%d/%m/%y", tlocal);
-	strftime(hora, 50, "%H:%M:%S", tlocal);
+    strftime(deposito.date, 50, "%d/%m/%y", tlocal);
+	strftime(deposito.time, 50, "%H:%M:%S", tlocal);
 
-	imprimeTicket(&IdUsuario);
-	registrarDepositoEnBitacora();
+	imprimeTicket(&IdUsuario, deposito);
+	registrarDepositoEnBitacora(deposito);
 }
 // ---------------------------------------- USAR LAS ESTRUCTURAS ----------------------------------------------
 
 
 
-void registrarDepositoEnBitacora()
+void registrarDepositoEnBitacora(struct transaction trans)
 {
 	bitacoraDeposito = fopen ("deposito.txt", "a");
-	fprintf(bitacoraDeposito,"%s   %s   %d   Deposito        %d\n",fecha, hora, IdUsuario, totalDisponible);
+	fprintf(bitacoraDeposito,"%s   %s   %d   Deposito        %d\n", trans.date, trans.time, IdUsuario, totalDisponible);
 	fclose(bitacoraDeposito);
 }
 
-void registrarRetiroEnBitacora()
+void registrarRetiroEnBitacora(struct transaction trans)
 {
-
 	bitacoraRetiro = fopen ("retiros.txt", "a");
-	fprintf(bitacoraRetiro,"%s   %s   %d    Retiro         %d\n",fecha, hora, IdUsuario, totalDisponible);
+	fprintf(bitacoraRetiro,"%s   %s   %d    Retiro         %d\n",  trans.date, trans.time, IdUsuario, totalDisponible);
 	fclose(bitacoraRetiro);
 }
 
-void imprimeTicket( int *idUsuario){
+void imprimeTicket( int *idUsuario, struct transaction trans)
+	{
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
 
-		printf("	Fecha: %s\n", fecha);
-		printf("	Hora: %s\n", hora);
+		printf("	Fecha: %s\n", trans.date);
+		printf("	Hora: %s\n", trans.time);
 		printf("	Codigo: %d\n", *idUsuario);
 		
 		if ( operation[1] == 'd') 
