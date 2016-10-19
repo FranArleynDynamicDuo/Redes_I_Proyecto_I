@@ -37,9 +37,6 @@ void imprimeTicket();
 
 /* GLOBAL VARIABLES */
 
-// bitacoraDeposito = fopen (dirBitacoraDeposito, "w+");
-// bitacoraRetiro = fopen (dirBitacoraRetiro, "w+");
-
 FILE * bitacoraDeposito;
 FILE * bitacoraRetiro;
 int totalDisponible = 80000;

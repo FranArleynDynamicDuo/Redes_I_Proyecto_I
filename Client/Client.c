@@ -7,7 +7,7 @@
 
 /* INCLUDES */
 #include <stdbool.h>					// bool, true, false
-#include "../Constants.h"         	// Mensajes De Error y funciones comunes
+#include "../Constants.h"         		// Mensajes De Error y funciones comunes
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
 #include <sys/socket.h>
 #include <string.h>             		// strlen
@@ -44,7 +44,7 @@ char buffer[MSG_LEN];
 int main(int argc, char *argv[]) {
 
 	/* LOCAL VARIABLES */
-	int i =0;				// Iterador Multi-uso
+	int i =0;					// Iterador Multi-uso
 	int serverPortSwitch = 0;	// Booleanos que indican si ya se dio el argumento
 	int userIdSwitch = 0;
 	int atmoduleSwitch = 0;
