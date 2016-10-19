@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 	int readWriteCode;
+	int monto;
 
 	/* SIGNALS */
 
@@ -97,6 +98,26 @@ int main(int argc, char *argv[]) {
 	{
 		errorAndExit(argNumError);
 	}
+
+	if (strcmp(operation,"r") == 0)
+	{
+		printf("Introduzca el valor del retiro\n");
+	}
+	else if (strcmp(operation,"d") == 0)
+	{
+		printf("Introduzca el valor del deposito\n");
+	}
+	else
+	{
+		errorAndExit("Operacion Invalida");
+	}
+	scanf("%d", &monto);
+	/* Si el monto es mas del maximo evitamos la transaccion */
+	if ( monto > 3000 )
+	{
+		errorAndExit("El monto maximo de retiro es 3000\n");
+	}
+
 	/*
 		http://www.linuxhowtos.org/C_C++/socket.htm
 
@@ -135,7 +156,7 @@ int main(int argc, char *argv[]) {
 	}
 	/* ENVIO DEL COMANDO */
 	bzero(buffer,MSG_LEN);
-	sprintf(buffer, "%s-%s-%d", operation, userId,AMOUNT);
+	sprintf(buffer, "%s-%s-%d", operation, userId,monto);
 	readWriteCode = write(socketDescriptor,buffer,strlen(buffer));
 	if (readWriteCode < 0)
 	{
