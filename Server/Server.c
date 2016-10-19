@@ -21,7 +21,7 @@
 #include <pthread.h>
 
 /* DEFINES */
-#define MSG_LEN 500
+#define MSG_LEN 700
 #define STATUS_LEN 100
 #define BASIC_PERMISSIONS 0666
 #define N 20
@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
 	int cajeroSeleccionado;
 	int trabajando;
 	int libres;
+	char operation;
+	int amount;
+	char userId;
 
 	/* SIGNALS */
 	signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
@@ -244,8 +247,9 @@ int main(int argc, char *argv[]) {
 				errorAndExit("ERROR reading from socket");
 			}
 			printf("Here is the message: %s\n",buffer);
+
+			token = strtok(message, " ");
 			/* ESCRIBIENDO AL SOCKET */
-			readWriteCode = write(newSocketDescriptor,"I got your message",18);
 			if (readWriteCode < 0)
 			{
 				errorAndExit("ERROR writing to socket");
@@ -298,7 +302,7 @@ static void sigkillHandler(int signo)
 	exit(0);
 }
 
-void retiros(int cajero,char idUsuario[],int monto)
+void retiro(int cajero,char idUsuario[],int monto)
 {
 	struct transaction retiro;
 	retiro.amount=monto;
@@ -400,22 +404,23 @@ void registrarRetiroEnBitacora(struct transaction trans)
  */
 void imprimeTicket( int *idUsuario, struct transaction trans)
 {
+	char ticket[700];
+	int readWriteCode;
+
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
-
-	printf("	Fecha: %s\n", trans.date);
-	printf("	Hora: %s\n", trans.time);
-	printf("	Codigo: %d\n", *idUsuario);
+	sprintf(ticket, "Fecha: %s\n	Hora: %s\n	Codigo: %d\n", trans.date, trans.time,*idUsuario);
 
 	if (trans.operation=='d')
 	{
-		printf("	Operacion: Deposito\n");
+		strcat(ticket, "	Operacion: Deposito\n");
 	}
-	else
+	else if (trans.operation=='r')
 	{
-		printf("	Operacion: Retiro\n");
+		strcat(ticket, "	Operacion: Retiro\n");
 	}
-	printf("\n");
+
+	readWriteCode = write(newSocketDescriptor,ticket,MSG_LEN);
 
 }
 
@@ -434,11 +439,11 @@ void *efectuarOperacion(void *threadarg)
 	dataHilo = (struct thread_data *) threadarg;
 	if (dataHilo->operation=='d')
 	{
-		retiros(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
+		retiro(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
 	}
 	else if (dataHilo->operation=='r')
 	{
-		depositos(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
+		deposito(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
 	}
 	return (void *) 0;
 }
