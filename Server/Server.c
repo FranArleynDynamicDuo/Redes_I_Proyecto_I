@@ -21,43 +21,43 @@
 #include <pthread.h>
 
 /* DEFINES */
+#define CODE_LEN 50
 #define STATUS_LEN 100
 #define BASIC_PERMISSIONS 0666
 #define N 20
 #define DEFAULT_CLIENT_AMOUNT 80000
 #define MAX_CAJEROS 3
-#define MAXTHREADS 6
 
 /* ESTRUCTURES */
 struct transaction {
-	char userCode[30];
+	char userCode[CODE_LEN];
 	char operation;
 	int amount;
-	char date[30];
-	char time[30];
+	char date[CODE_LEN];
+	char time[CODE_LEN];
 	int cajero;
 };
 /* Estructura que guarda los argumentos a ser utilizados por los hilos */
 struct thread_data
 {
 	int  thread_id;
-	char userCode[30];
+	char userCode[CODE_LEN];
 	char operation;
 	int amount;
-	char date[30];
-	char time[30];
+	char date[CODE_LEN];
+	char time[CODE_LEN];
 	int cajero;
 };
 
 /* FUNCTION SIGNATURES */
 static void sigkillHandler(int signo);
-void retiros();
-void deposito();
+void retiro(int cajero,char idUsuario[],int monto);
+void deposito(int cajero,char idUsuario[],int monto);
 void inicializarBitacoraDeposito();
 void inicializarBitacoraRetiro();
-void registrarDepositoEnBitacora();
-void registrarRetiroEnBitacora();
-void imprimeTicket();
+void registrarDepositoEnBitacora(struct transaction trans);
+void registrarRetiroEnBitacora(struct transaction trans);
+void imprimeTicket(struct transaction trans);
 void *efectuarOperacion(void *threadarg);
 
 /* GLOBAL VARIABLES */
@@ -74,7 +74,6 @@ char buffer[MSG_LEN];
 struct sockaddr_in cajeros_addr[MAX_CAJEROS];
 int balanceCajeros[MAX_CAJEROS];
 int numeroCajeros=0;
-struct thread_data thread_data_array[MAX_CAJEROS];		// Variable que guarda los argumentos a ser utilizados por los hilos
 
 int main(int argc, char *argv[]) {
 
@@ -94,8 +93,12 @@ int main(int argc, char *argv[]) {
 	int libres;
 	char operation;
 	int amount;
-	char userId[30];
+	char userId[CODE_LEN];
 	char *token;
+	int rc;
+	pthread_t hilos[MAX_CAJEROS];				// Lista de hilos
+	struct thread_data thread_data_array[MAX_CAJEROS];		// Variable que guarda los argumentos a ser utilizados por los hilos
+
 
 	/* SIGNALS */
 	signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
@@ -234,37 +237,15 @@ int main(int argc, char *argv[]) {
 		thread_data_array[cajeroSeleccionado].operation=token[0];
 		/* Codigo De Usuario */
 		token = strtok(0, "-");
-		bzero(thread_data_array[cajeroSeleccionado].userCode,30);
-		strcpy(thread_data_array[cajeroSeleccionado].userCode,userId);
+		strcpy(thread_data_array[cajeroSeleccionado].userCode,token);
 		/* Monto */
 		token = strtok(0, "-");
 		thread_data_array[cajeroSeleccionado].amount=atoi(token);
 
-		/* Create child process */
-		pid = fork();
-
-		if (pid < 0)
+		rc = pthread_create(&hilos[cajeroSeleccionado], NULL, efectuarOperacion, (void *) &thread_data_array[cajeroSeleccionado]);
+		if (rc)
 		{
-			perror("ERROR on fork");
-			exit(1);
-		}
-
-		if (pid == 0)
-		{
-			/* This is the client process */
-			close(socketDescriptor);
-
-
-			/* ESCRIBIENDO AL SOCKET */
-			if (readWriteCode < 0)
-			{
-				errorAndExit("ERROR writing to socket");
-			}
-			exit(0);
-		}
-		else
-		{
-			close(newSocketDescriptor);
+			errorAndExit(pthreadCreateError);
 		}
 	}
 	close(newSocketDescriptor);
@@ -275,21 +256,21 @@ int main(int argc, char *argv[]) {
 void inicializarBitacoraDeposito()
 {
 	bitacoraDeposito = fopen (dirBitacoraDeposito, "w+");
-	fputs( "---------------------Bitacora de Depositos ------------------\n", bitacoraDeposito );
-	fputs( "\n", bitacoraDeposito );
-	fputs( "Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible\n", bitacoraDeposito );
-	fputs( "-------------------------------------------------------------\n", bitacoraDeposito );
-	fputs( "\n", bitacoraDeposito );
+	fprintf(bitacoraDeposito,"-------------------------------------------- Bitacora de Depositos --------------------------------------------\n");
+	fprintf(bitacoraDeposito,"Cajero           Fecha           Hora       Codigo    Operacion      Monto      Total Disponible\n");
+	fprintf(bitacoraDeposito,"-------------------------------------------------------------------------------------------------------------\n");
+	fprintf(bitacoraDeposito,"\n");
+	fclose(bitacoraDeposito);
 }
 
 void inicializarBitacoraRetiro()
 {
 	bitacoraRetiro = fopen (dirBitacoraRetiro, "w+");
-	fputs( "---------------------Bitacora de Retiros --------------------\n", bitacoraRetiro );
-	fputs( "\n", bitacoraRetiro );
-	fputs( "Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible\n", bitacoraRetiro );
-	fputs( "-------------------------------------------------------------\n", bitacoraRetiro );
-	fputs( "\n", bitacoraRetiro );
+	fprintf(bitacoraRetiro,"-------------------------------------------- Bitacora de Retiros --------------------------------------------\n");
+	fprintf(bitacoraRetiro,"Cajero           Fecha           Hora       Codigo    Operacion      Monto      Total Disponible\n");
+	fprintf(bitacoraRetiro,"-------------------------------------------------------------------------------------------------------------\n");
+	fprintf(bitacoraRetiro,"\n");
+	fclose(bitacoraRetiro);
 }
 /*
  * Function:  sigkillHandler
@@ -312,30 +293,23 @@ void retiro(int cajero,char idUsuario[],int monto)
 {
 	struct transaction retiro;
 	retiro.amount=monto;
+	retiro.operation='r';
+	strcpy(retiro.userCode,"");
+	strcpy(retiro.userCode,idUsuario);
+	retiro.cajero=cajero;
 
 	if 	(retiro.amount <= balanceCajeros[cajero])
 	{
-		if ( retiro.amount <= 3000 )
-		{
-			balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
-			printf("Valor del retiro: %d\n", retiro.amount);
-			printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
-			strcpy(retiro.userCode,idUsuario);
-			retiro.cajero=cajero;
-			retiro.operation='d';
-			time_t tiempo = time(0);
-			struct tm *tlocal = localtime(&tiempo);
-			strftime(retiro.date, 50, "%d/%m/%y", tlocal);
-			strftime(retiro.time, 50, "%H:%M:%S", tlocal);
+		balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
+		printf("Valor del retiro: %d\n", retiro.amount);
+		printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
+		time_t tiempo = time(0);
+		struct tm *tlocal = localtime(&tiempo);
+		strftime(retiro.date, 50, "%d/%m/%y", tlocal);
+		strftime(retiro.time, 50, "%H:%M:%S", tlocal);
 
-			imprimeTicket(&idUsuario, retiro);
-			registrarRetiroEnBitacora(retiro);
-
-		}
-		else
-		{
-			printf("El monto maximo de retiro es 3000\n");
-		}
+		imprimeTicket(retiro);
+		registrarRetiroEnBitacora(retiro);
 	}
 	else
 	{
@@ -347,20 +321,21 @@ void deposito(int cajero,char idUsuario[],int monto)
 {
 	struct transaction deposito;
 	deposito.amount=monto;
+	deposito.operation='d';
+	strcpy(deposito.userCode,"");
+	strcpy(deposito.userCode,idUsuario);
+
 	balanceCajeros[cajero] = balanceCajeros[cajero] + deposito.amount;
 
 	printf("Valor del deposito: %d\n", deposito.amount);
 	printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
 
-	strcpy(deposito.userCode,idUsuario);
-	deposito.cajero=cajero;
-	deposito.operation='d';
 	time_t tiempo = time(0);
 	struct tm *tlocal = localtime(&tiempo);
 	strftime(deposito.date, 50, "%d/%m/%y", tlocal);
 	strftime(deposito.time, 50, "%H:%M:%S", tlocal);
 
-	imprimeTicket(&idUsuario, deposito);
+	imprimeTicket(deposito);
 	registrarDepositoEnBitacora(deposito);
 }
 
@@ -375,12 +350,13 @@ void deposito(int cajero,char idUsuario[],int monto)
 void registrarDepositoEnBitacora(struct transaction trans)
 {
 	bitacoraDeposito = fopen (dirBitacoraDeposito, "a");
-	fprintf(bitacoraDeposito,"%d   %s   %s   %s   Deposito        %d\n",
+	fprintf(bitacoraDeposito,"  %d             %s       %s     %s     Deposito          %d            %d\n",
 			trans.cajero,
 			trans.date,
 			trans.time,
 			trans.userCode,
-			trans.amount);
+			trans.amount,
+			balanceCajeros[trans.cajero]);
 	fclose(bitacoraDeposito);
 }
 /*
@@ -392,13 +368,14 @@ void registrarDepositoEnBitacora(struct transaction trans)
  */
 void registrarRetiroEnBitacora(struct transaction trans)
 {
-	bitacoraDeposito = fopen (dirBitacoraRetiro, "a");
-	fprintf(bitacoraRetiro,"%d   %s   %s   %s   Retiro        %d\n",
+	bitacoraRetiro = fopen (dirBitacoraRetiro, "a");
+	fprintf(bitacoraRetiro,"  %d             %s       %s     %s     Retiro          %d            %d\n",
 			trans.cajero,
 			trans.date,
 			trans.time,
 			trans.userCode,
-			trans.amount);
+			trans.amount,
+			balanceCajeros[trans.cajero]);
 	fclose(bitacoraRetiro);
 }
 /*
@@ -408,14 +385,14 @@ void registrarRetiroEnBitacora(struct transaction trans)
  *
  *  returns: void
  */
-void imprimeTicket( int *idUsuario, struct transaction trans)
+void imprimeTicket(struct transaction trans)
 {
 	char ticket[700];
 	int readWriteCode;
 
 	printf("\n");
 	printf("Se Imprime el Ticket del Usuario:\n");
-	sprintf(ticket, "Fecha: %s\n	Hora: %s\n	Codigo: %d\n", trans.date, trans.time,*idUsuario);
+	sprintf(ticket, "Fecha: %s\n	Hora: %s\n	Codigo: %s\n", trans.date, trans.time,trans.userCode);
 
 	if (trans.operation=='d')
 	{
@@ -440,17 +417,16 @@ void imprimeTicket( int *idUsuario, struct transaction trans)
  */
 void *efectuarOperacion(void *threadarg)
 {
-	close(socketDescriptor);
 	struct thread_data *dataHilo;			// Variable temporal para obtener los argumentos de la funcion
 	/* Obtenemos los argumentos del hilo */
 	dataHilo = (struct thread_data *) threadarg;
 	if (dataHilo->operation=='d')
 	{
-		retiro(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
+		deposito(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
 	}
 	else if (dataHilo->operation=='r')
 	{
-		deposito(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
+		retiro(dataHilo->cajero,dataHilo->userCode,dataHilo->amount);
 	}
 	return (void *) 0;
 }
