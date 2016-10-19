@@ -3,18 +3,3 @@
 Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible
 -------------------------------------------------------------
 
----------------------Bitacora de Depositos ------------------
-
-Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible
--------------------------------------------------------------
-
----------------------Bitacora de Depositos ------------------
-
-Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible
--------------------------------------------------------------
-
----------------------Bitacora de Depositos ------------------
-
-Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible
--------------------------------------------------------------
-

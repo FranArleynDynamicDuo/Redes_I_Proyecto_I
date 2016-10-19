@@ -21,7 +21,6 @@
 #include <pthread.h>
 
 /* DEFINES */
-#define MSG_LEN 700
 #define STATUS_LEN 100
 #define BASIC_PERMISSIONS 0666
 #define N 20
@@ -75,15 +74,7 @@ char buffer[MSG_LEN];
 struct sockaddr_in cajeros_addr[MAX_CAJEROS];
 int balanceCajeros[MAX_CAJEROS];
 int numeroCajeros=0;
-pthread_mutex_t numTotalBlocksLock;					// Mutex para asegurar la exclusividad mutua con el contador
-// de bloques global
-pthread_mutex_t hilosEstadosBlocksLock;				// Mutex para asegurar la exclusividad mutua con el arreglo
-// de estado de hilos global
-pthread_mutex_t pilaDirectoriosBlocksLock;			// Mutex para asegurar la exclusividad mutua con la pila
-// global de directorios
-int hilosEstado[MAXTHREADS];							// Lista de estado de los hilos, indican si estan libres o
-// trabajando
-struct thread_data thread_data_array[MAXTHREADS];		// Variable que guarda los argumentos a ser utilizados por los hilos
+struct thread_data thread_data_array[MAX_CAJEROS];		// Variable que guarda los argumentos a ser utilizados por los hilos
 
 int main(int argc, char *argv[]) {
 
@@ -103,7 +94,8 @@ int main(int argc, char *argv[]) {
 	int libres;
 	char operation;
 	int amount;
-	char userId;
+	char userId[30];
+	char *token;
 
 	/* SIGNALS */
 	signal(SIGPIPE, SIG_IGN);			// Manejador de senales para SIGPIPE
@@ -227,6 +219,27 @@ int main(int argc, char *argv[]) {
 		/* Vaciamos el buffer */
 		bzero(buffer,MSG_LEN);
 
+		/* LEYENDO DEL SOCKET */
+		readWriteCode = read(newSocketDescriptor,buffer,255);
+		if (readWriteCode < 0)
+		{
+			errorAndExit("ERROR reading from socket");
+		}
+		printf("Here is the message: %s\n",buffer);
+
+		thread_data_array[cajeroSeleccionado].cajero=cajeroSeleccionado;
+
+		/* Operacion */
+		token = strtok(buffer, "-");
+		thread_data_array[cajeroSeleccionado].operation=token[0];
+		/* Codigo De Usuario */
+		token = strtok(0, "-");
+		bzero(thread_data_array[cajeroSeleccionado].userCode,30);
+		strcpy(thread_data_array[cajeroSeleccionado].userCode,userId);
+		/* Monto */
+		token = strtok(0, "-");
+		thread_data_array[cajeroSeleccionado].amount=atoi(token);
+
 		/* Create child process */
 		pid = fork();
 
@@ -240,15 +253,8 @@ int main(int argc, char *argv[]) {
 		{
 			/* This is the client process */
 			close(socketDescriptor);
-			/* LEYENDO DEL SOCKET */
-			readWriteCode = read(newSocketDescriptor,buffer,255);
-			if (readWriteCode < 0)
-			{
-				errorAndExit("ERROR reading from socket");
-			}
-			printf("Here is the message: %s\n",buffer);
 
-			token = strtok(message, " ");
+
 			/* ESCRIBIENDO AL SOCKET */
 			if (readWriteCode < 0)
 			{
@@ -434,6 +440,7 @@ void imprimeTicket( int *idUsuario, struct transaction trans)
  */
 void *efectuarOperacion(void *threadarg)
 {
+	close(socketDescriptor);
 	struct thread_data *dataHilo;			// Variable temporal para obtener los argumentos de la funcion
 	/* Obtenemos los argumentos del hilo */
 	dataHilo = (struct thread_data *) threadarg;

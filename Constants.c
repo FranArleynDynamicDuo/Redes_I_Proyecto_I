@@ -8,7 +8,7 @@
  */
 
 #define BASIC_PERMISSIONS 0666
-#define MSG_LEN 500
+#define MSG_LEN 700
 #define MENU_LEN 800
 #define ERROR_LEN 160
 
