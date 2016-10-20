@@ -292,6 +292,8 @@ static void sigkillHandler(int signo)
 void retiro(int cajero,char idUsuario[],int monto)
 {
 	struct transaction retiro;
+	int readWriteCode;
+
 	retiro.amount=monto;
 	retiro.operation='r';
 	strcpy(retiro.userCode,"");
@@ -313,7 +315,12 @@ void retiro(int cajero,char idUsuario[],int monto)
 	}
 	else
 	{
-		printf("Dinero No Disponible\n");
+		readWriteCode = write(newSocketDescriptor,"Dinero No Disponible\n",MSG_LEN);
+		if (readWriteCode < 0)
+		{
+			errorAndExit("ERROR writing to socket");
+		}
+
 	}
 }
 
