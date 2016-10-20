@@ -37,6 +37,10 @@ struct transaction {
 	char time[CODE_LEN];
 	int cajero;
 };
+struct user {
+	char userCode[CODE_LEN];
+	int retiros;
+};
 /* Estructura que guarda los argumentos a ser utilizados por los hilos */
 struct thread_data
 {

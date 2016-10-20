@@ -36,7 +36,7 @@
 int totalDisponible = 80000;
 char operation[1];
 int serverPort;
-char userId[NAME_LEN];
+int userId;
 char atentionModule[NAME_LEN];
 int socketDescriptor;
 char buffer[MSG_LEN];
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 			/* Caso 2.2: Se recibio el archivo de bitacora de deposito */
 			else if ((strcmp(argv[i],"-i")) == 0 && userIdSwitch == 0)
 			{
-				strcpy(userId,argv[i + 1]);
+				userId=atoi(argv[i + 1]);
 				userIdSwitch = 1;
 			}
 			/* Caso 2.3: Se recibio el archivo de bitacora de retiro */
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 	}
 	/* ENVIO DEL COMANDO */
 	bzero(buffer,MSG_LEN);
-	sprintf(buffer, "%s-%s-%d", operation, userId,monto);
+	sprintf(buffer, "%s-%d-%d", operation, userId,monto);
 	readWriteCode = write(socketDescriptor,buffer,strlen(buffer));
 	if (readWriteCode < 0)
 	{
