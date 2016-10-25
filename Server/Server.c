@@ -27,6 +27,7 @@
 #define N 20
 #define DEFAULT_CLIENT_AMOUNT 80000
 #define MAX_CAJEROS 3
+#define MAX_USUARIOS 10
 
 /* ESTRUCTURES */
 struct transaction {
@@ -75,9 +76,11 @@ int socketDescriptor;
 int newSocketDescriptor;
 int portno;
 char buffer[MSG_LEN];
+struct user usuarios[MAX_USUARIOS];
 struct sockaddr_in cajeros_addr[MAX_CAJEROS];
 int balanceCajeros[MAX_CAJEROS];
 int numeroCajeros=0;
+int numeroUsuarios=0;
 
 int main(int argc, char *argv[]) {
 
@@ -201,7 +204,7 @@ int main(int argc, char *argv[]) {
 		{
 			errorAndExit("ERROR on accept");
 		}
-
+		/* REGISTRO DE CAJERO */
 		/* Verificamos si el cajero ya esta registrado */
 		encontrado=false;
 		for (i=0;i<MAX_CAJEROS;i++)
@@ -213,7 +216,6 @@ int main(int argc, char *argv[]) {
 				break;
 			}
 		}
-
 		/* Si no esta registrado lo registramos */
 		if (!encontrado)
 		{
@@ -234,6 +236,7 @@ int main(int argc, char *argv[]) {
 		}
 		printf("Here is the message: %s\n",buffer);
 
+		/* MANEJO DE MENSAJE */
 		thread_data_array[cajeroSeleccionado].cajero=cajeroSeleccionado;
 
 		/* Operacion */
@@ -245,6 +248,26 @@ int main(int argc, char *argv[]) {
 		/* Monto */
 		token = strtok(0, "-");
 		thread_data_array[cajeroSeleccionado].amount=atoi(token);
+
+		/* REGISTRO DE USUARIO */
+
+		/* Buscamos al usuario */
+		encontrado=false;
+		for (i=0;i<MAX_USUARIOS;i++)
+		{
+			if(strcmp(thread_data_array[cajeroSeleccionado].userCode,usuarios[i].userCode)==0)
+			{
+				encontrado=true;
+				break;
+			}
+		}
+		/* Si no esta registrado lo registramos */
+		if (!encontrado)
+		{
+			strcpy(usuarios[numeroUsuarios].userCode,thread_data_array[cajeroSeleccionado].userCode);
+			usuarios[numeroUsuarios].retiros=0;
+			numeroUsuarios+=1;
+		}
 
 		rc = pthread_create(&hilos[cajeroSeleccionado], NULL, efectuarOperacion, (void *) &thread_data_array[cajeroSeleccionado]);
 		if (rc)
@@ -297,6 +320,7 @@ void retiro(int cajero,char idUsuario[],int monto)
 {
 	struct transaction retiro;
 	int readWriteCode;
+	int i=0;
 
 	retiro.amount=monto;
 	retiro.operation='r';
@@ -306,6 +330,24 @@ void retiro(int cajero,char idUsuario[],int monto)
 
 	if 	(retiro.amount <= balanceCajeros[cajero])
 	{
+		/* Buscamos al usuario */
+		for (i=0;i<MAX_USUARIOS;i++)
+		{
+			if(strcmp(retiro.userCode,usuarios[i].userCode)==0)
+			{
+				break;
+			}
+		}
+		/* Si el usuario tiene 3 retiros o mas, no puede retirar mas por la sesion */
+		if (usuarios[i].retiros>=3)
+		{
+			readWriteCode = write(newSocketDescriptor,"Ya acabo su cupo de retiros por hoy\n",MSG_LEN);
+			if (readWriteCode < 0)
+			{
+				errorAndExit("ERROR writing to socket");
+			}
+		}
+
 		balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
 		printf("Valor del retiro: %d\n", retiro.amount);
 		printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
@@ -313,7 +355,7 @@ void retiro(int cajero,char idUsuario[],int monto)
 		struct tm *tlocal = localtime(&tiempo);
 		strftime(retiro.date, 50, "%d/%m/%y", tlocal);
 		strftime(retiro.time, 50, "%H:%M:%S", tlocal);
-
+		usuarios[i].retiros+=1;
 		imprimeTicket(retiro);
 		registrarRetiroEnBitacora(retiro);
 	}
@@ -324,7 +366,6 @@ void retiro(int cajero,char idUsuario[],int monto)
 		{
 			errorAndExit("ERROR writing to socket");
 		}
-
 	}
 }
 
