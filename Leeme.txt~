@@ -10,7 +10,9 @@ Arleyn Goncalves	# 10-10290
 1. Archivos que contiene el .targ
 
 	- Makefile
-		/* FALTA EXPLICACION */
+		Archivo que nos permite compilar todos los archivos requeridos.
+		Al ingresar el comando make, se obtienen todos los archivos .o
+		necesarios para correr el programa.
 
 	- Cliente.c
 		/* FALTA EXPLICACION */
@@ -19,16 +21,19 @@ Arleyn Goncalves	# 10-10290
 		/* FALTA EXPLICACION */
 
 	- Constants.c
-		/* FALTA EXPLICACION */
+		Contiene los strings de constantes utilizados por el proyecto
 
 	- Constants.h
-		/* FALTA EXPLICACION */
+		Contiene las definiciones de los strings de constantes utilizados 
+		por el proyecto.
 
 	- ErrorHandling.c
-		/* FALTA EXPLICACION */
+		Archivo que contiene funciones para imprimir mensajes de error
+		y funciones que sirvan como manejadores de excepciones.
 
 	- ErrorHandling.h
-		/* FALTA EXPLICACION */
+		Archivo que contiene funciones para imprimir mensajes de error
+		y funciones que sirvan como manejadores de excepciones.
 
 
 2. ¿Que hace el Programa?
