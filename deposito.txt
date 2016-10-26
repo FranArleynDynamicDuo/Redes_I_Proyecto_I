@@ -1,5 +1,0 @@
----------------------Bitacora de Depositos ------------------
-
-Cajero      Fecha      Hora      Codigo   Operacion   Total Disponible
--------------------------------------------------------------
-
