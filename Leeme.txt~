@@ -15,10 +15,45 @@ Arleyn Goncalves	# 10-10290
 		necesarios para correr el programa.
 
 	- Cliente.c
-		/* FALTA EXPLICACION */
-
+		Contiene todas la funciones respectivas del cliente como cajero 
+		automático, verifica los comandos ingresados y
+		contiene el código del socket que corresponde al lado del cliente.
+		
 	- Server.c
-		/* FALTA EXPLICACION */
+		Contiene todas la funciones respectivas del sistema central que 
+		trabaja la red, verifica los comandos ingresados y
+		contiene el código del socket que corresponde al lado del servidor.
+
+		Además tiene las siguientes funciones:
+		
+			- inicializarBitacoraDeposito: para crear e iniciar el archivo .txt
+			  donde se registraran los depósitos del sistema.
+
+			- inicializarBitacoraRetiro: para crear e iniciar el archivo .txt
+			  donde se registraran los retiros del sistema.
+ 
+			- sigkillHandler: manejador de señales usado en dado caso que el 
+			  servidor se cierre inesperadamente.
+
+			- retiro: se manejan todas las operaciones respectivas al retiro
+			  de dinero en el cajero automático.
+
+			- deposito: se manejan todas las operaciones respectivas al deposito
+			  de dinero en el cajero automático.
+
+			- registrarDepositoEnBitacora: registra en la bitácora
+			  ( un archivo .txt inicializado anteriormente) todos los retiros 
+			  realizados en los cajeros automáticos.
+
+			- registrarRetiroEnBitacora: registra en la bitácora
+			  ( un archivo .txt inicializado anteriormente) todos los retiros 
+			  realizados en los cajeros automáticos.
+
+			- imprimeTicket: muestra en el terminal los datos relacionados a la 
+			  operación realizada (deposito/retiro) por el usuario.
+
+			- efectuarOperacion: funcion auxiliar que retorna -1 si tiene un error
+			  y 0 si se ejecuto correctamente.
 
 	- Constants.c
 		Contiene los strings de constantes utilizados por el proyecto

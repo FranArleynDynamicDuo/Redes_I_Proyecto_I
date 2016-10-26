@@ -11,18 +11,18 @@ Arleyn Goncalves	# 10-10290
 
 	- Makefile
 		Archivo que nos permite compilar todos los archivos requeridos.
-		Al ingresar el comando make, se obtienen todos los archivos .o
-		necesarios para correr el programa.
+		Al ingresar el comando make en el terminal, se obtienen todos 
+		los archivos .o necesarios para correr el programa.
 
 	- Cliente.c
 		Contiene todas la funciones respectivas del cliente como cajero 
-		automático, verifica los comandos ingresados y
-		contiene el código del socket que corresponde al lado del cliente.
+		automático, verifica los comandos ingresados y contiene el código del 
+		socket que corresponde al cliente.
 		
 	- Server.c
 		Contiene todas la funciones respectivas del sistema central que 
-		trabaja la red, verifica los comandos ingresados y
-		contiene el código del socket que corresponde al lado del servidor.
+		trabaja la red, verifica los comandos ingresados y contiene el código del 
+		socket que corresponde al servidor.
 
 		Además tiene las siguientes funciones:
 		
