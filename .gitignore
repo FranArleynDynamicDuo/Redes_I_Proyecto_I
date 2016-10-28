@@ -39,3 +39,5 @@
 
 bsb_cli
 bsb_svr
+*.gch
+*~
