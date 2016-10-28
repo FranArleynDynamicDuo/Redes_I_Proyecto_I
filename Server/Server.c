@@ -352,6 +352,10 @@ void retiro(int cajero,char idUsuario[],int monto)
 			balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
 			printf("Valor del retiro: %d\n", retiro.amount);
 			printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
+			if (balanceCajeros[cajero] <= 5000)
+			{
+				printf("Monto total menor o igual a 5000, El cajero necesita recarga\n");
+			}
 			time_t tiempo = time(0);
 			struct tm *tlocal = localtime(&tiempo);
 			strftime(retiro.date, 50, "%d/%m/%y", tlocal);
