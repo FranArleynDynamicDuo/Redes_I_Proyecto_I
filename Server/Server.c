@@ -347,17 +347,20 @@ void retiro(int cajero,char idUsuario[],int monto)
 				errorAndExit("ERROR writing to socket");
 			}
 		}
+		else
+		{
+			balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
+			printf("Valor del retiro: %d\n", retiro.amount);
+			printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
+			time_t tiempo = time(0);
+			struct tm *tlocal = localtime(&tiempo);
+			strftime(retiro.date, 50, "%d/%m/%y", tlocal);
+			strftime(retiro.time, 50, "%H:%M:%S", tlocal);
+			usuarios[i].retiros+=1;
+			imprimeTicket(retiro);
+			registrarRetiroEnBitacora(retiro);
+		}
 
-		balanceCajeros[cajero] = balanceCajeros[cajero] - retiro.amount;
-		printf("Valor del retiro: %d\n", retiro.amount);
-		printf("Valor del Total Disponible: %d\n",balanceCajeros[cajero]);
-		time_t tiempo = time(0);
-		struct tm *tlocal = localtime(&tiempo);
-		strftime(retiro.date, 50, "%d/%m/%y", tlocal);
-		strftime(retiro.time, 50, "%H:%M:%S", tlocal);
-		usuarios[i].retiros+=1;
-		imprimeTicket(retiro);
-		registrarRetiroEnBitacora(retiro);
 	}
 	else
 	{
