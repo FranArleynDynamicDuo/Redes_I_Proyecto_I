@@ -7,7 +7,7 @@
 
 /* INCLUDES */
 #include <stdbool.h>					// bool, true, false
-#include "../Constants.h"         	// Mensajes De Error y funciones comunes
+#include "../Constants.h"         		// Mensajes De Error y funciones comunes
 #include "../ErrorHandling.h"         	// Mensajes De Error y funciones comunes
 #include <sys/socket.h>
 #include <string.h>             		// strlen
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 	}
 	scanf("%d", &monto);
 	/* Si el monto es mas del maximo evitamos la transaccion */
-	if ( monto > 3000 )
+	if ( monto > 3000 && strcmp(operation,"r") == 0)
 	{
 		errorAndExit("El monto maximo de retiro es 3000\n");
 	}
