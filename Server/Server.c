@@ -383,6 +383,7 @@ void deposito(int cajero,char idUsuario[],int monto)
 	deposito.operation='d';
 	strcpy(deposito.userCode,"");
 	strcpy(deposito.userCode,idUsuario);
+	deposito.cajero=cajero;
 
 	balanceCajeros[cajero] = balanceCajeros[cajero] + deposito.amount;
 
