@@ -139,6 +139,11 @@ Arleyn Goncalves	# 10-10290
 
 		- En el parámetro <codigo_usuario>, se pueden ingresar maximo 10 digitos.
 
+		- Al ingresar el monto de retiro o depósito, su valor no puede tener mas de 9 digitos.
+
+		- En los directorios para las bitacoras de retiro y deposito se pueden ingresar maximo 700
+		carácteres.
+
 
 
 
