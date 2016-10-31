@@ -132,7 +132,8 @@ Arleyn Goncalves	# 10-10290
 
 4. ¿Condiciones particulares del programa?
 
-
+		- En la linea de comando del servidor, el valor <puerto_bsb_svr> no puede terminar en 
+		  el numero 0.
 
 
 
