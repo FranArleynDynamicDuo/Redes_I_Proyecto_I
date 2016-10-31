@@ -132,8 +132,12 @@ Arleyn Goncalves	# 10-10290
 
 4. ¿Condiciones particulares del programa?
 
-		- En la linea de comando del servidor, el valor <puerto_bsb_svr> no puede terminar en 
-		  el numero 0.
+		- En la linea de comando del servidor, el parametro <puerto_bsb_svr> se pueden ingresar
+		minimo 4 digitos y máximo 9 dígitos.
+
+		- Esta certificado para funcionar con direcciones en redes locales.
+
+		- En el parámetro <codigo_usuario>, se pueden ingresar maximo 10 digitos.
 
 
 
